@@ -5,8 +5,9 @@ use amethyst::renderer::{SpriteRender, SpriteSheetHandle};
 use amethyst::core::cgmath::Vector3;
 use amethyst::core::transform::Transform;
 
-const BALL_VELOCITY_X: f32 = 75.0;
-const BALL_VELOCITY_Y: f32 = 50.0;
+pub const BALL_NUM: usize = 1;
+const BALL_VELOCITY_X: f32 = 50.0;
+const BALL_VELOCITY_Y: f32 = 25.0;
 const BALL_RADIUS: f32 = 2.0;
 
 pub const PADDLE_HEIGHT: f32 = 16.0;
@@ -14,10 +15,25 @@ const PADDLE_WIDTH: f32 = 4.0;
 
 use super::{ARENA_HEIGHT_MIDDLE, ARENA_WIDTH_MIDDLE};
 
-#[derive(PartialEq, Eq)]
 pub enum Side {
     Left,
     Right,
+}
+
+impl Side {
+    pub fn is_left(&self) -> bool {
+        match self {
+            Side::Left => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_right(&self) -> bool {
+        match self {
+            Side::Right => true,
+            _ => false,
+        }
+    }
 }
 
 pub struct Paddle {
@@ -30,8 +46,8 @@ impl Paddle {
     fn new(side: Side) -> Self {
         Paddle {
             side: side,
-            width: 1.0,
-            height: 1.0,
+            width: PADDLE_WIDTH,
+            height: PADDLE_HEIGHT,
         }
     }
 
