@@ -1,0 +1,17 @@
+[package]
+name = "pong"
+version = "0.1.0"
+authors = []
+
+[dependencies]
+amethyst = "0.9"
+lazy-panic = "0.3"
+rand = "0.5"
+
+[dependencies.log]
+version = "0"
+default-features = false
+features = ["max_level_warn", "release_max_level_warn"]
+
+[profile.dev]
+opt-level = 2
