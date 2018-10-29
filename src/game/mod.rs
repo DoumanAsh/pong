@@ -9,6 +9,7 @@ const ARENA_WIDTH: f32 = 100.0;
 const ARENA_HEIGHT_MIDDLE: f32 = ARENA_HEIGHT / 2.0;
 const ARENA_WIDTH_MIDDLE: f32 = ARENA_WIDTH / 2.0;
 
+mod audio;
 mod camera;
 mod graphics;
 mod components;
@@ -26,7 +27,7 @@ macro_rules! init_world {
 
 impl<'a, 'b> SimpleState<'a, 'b> for Game {
     fn on_start(&mut self, data: StateData<GameData>) {
-        init_world!(data: [camera, components,]);
+        init_world!(data: [camera, components, audio,]);
     }
 }
 
@@ -65,6 +66,7 @@ pub fn run() -> amethyst::Result<()> {
     let game_data = GameDataBuilder::default().with_bundle(pipe).expect("To add bundle")
                                               .with_bundle(TransformBundle::new()).expect("To add bundle")
                                               .with_bundle(get_input_config()).expect("To add bundle")
+                                              .with_bundle(amethyst::audio::AudioBundle::new(|_: &mut audio::Sounds| None)).expect("To add bundle")
                                               .with_bundle(amethyst::ui::UiBundle::<String, String>::new()).expect("To add bundle")
                                               .with(systems::PaddleSystem, systems::paddle::NAME, &["input_system"])
                                               .with(systems::BallMove, systems::ball::MOVE, &[])

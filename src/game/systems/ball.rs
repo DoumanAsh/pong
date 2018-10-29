@@ -1,9 +1,11 @@
 use amethyst::core::Transform;
 use amethyst::core::timing::Time;
+use amethyst::assets::{AssetStorage};
 use amethyst::ecs::{Join, Read, ReadStorage, ReadExpect, System, Write, WriteStorage};
 use amethyst::ui::UiText;
 
 use utils;
+use game;
 use game::components::ui::{ScoreText};
 use game::components::gameplay::{BALL_NUM, Paddle, Ball};
 use game::{ARENA_WIDTH_MIDDLE, ARENA_HEIGHT_MIDDLE, ARENA_WIDTH, ARENA_HEIGHT};
@@ -64,9 +66,12 @@ impl BallCollision {
 }
 
 impl<'s> System<'s> for BallCollision {
-    type SystemData = (WriteStorage<'s, Ball>, ReadStorage<'s, Paddle>, WriteStorage<'s, Transform>, WriteStorage<'s, UiText>, Write<'s, ScoreBoard>, ReadExpect<'s, ScoreText>);
+    type SystemData = (WriteStorage<'s, Ball>, ReadStorage<'s, Paddle>,
+                       WriteStorage<'s, Transform>,
+                       WriteStorage<'s, UiText>, Write<'s, ScoreBoard>, ReadExpect<'s, ScoreText>,
+                       Read<'s, AssetStorage<amethyst::audio::Source>>, ReadExpect<'s, game::audio::Sounds>, Option<Read<'s, amethyst::audio::output::Output>>);
 
-    fn run(&mut self, (mut balls, paddles, mut transforms, mut ui_text, mut score_board, score_text): Self::SystemData) {
+    fn run(&mut self, (mut balls, paddles, mut transforms, mut ui_text, mut score_board, score_text, audio_storage, sounds, audio_output): Self::SystemData) {
         let mut balls_passed = [true; BALL_NUM];
         let mut ball_idx = 0;
 
@@ -90,6 +95,8 @@ impl<'s> System<'s> for BallCollision {
                         if paddle.side.is_left() && ball.velocity[0] < 0.0 {
                             ball.velocity[0] = -ball.velocity[0];
 
+                            sounds.play_nepu(&audio_storage, audio_output.as_ref().map(std::ops::Deref::deref));
+
                             score_board.p1 = std::cmp::min(SCORE_CAP, score_board.p1 + 1);
                             if let Some(text) = ui_text.get_mut(score_text.p1) {
                                 text.text = score_board.p1.to_string();
@@ -97,6 +104,8 @@ impl<'s> System<'s> for BallCollision {
                             continue 'ball;
                         } else if paddle.side.is_right() && ball.velocity[0] > 0.0 {
                             ball.velocity[0] = -ball.velocity[0];
+
+                            sounds.play_nepu(&audio_storage, audio_output.as_ref().map(std::ops::Deref::deref));
 
                             score_board.p2 = std::cmp::min(SCORE_CAP, score_board.p2 + 1);
                             if let Some(text) = ui_text.get_mut(score_text.p2) {
