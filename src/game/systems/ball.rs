@@ -46,7 +46,7 @@ impl BallCollision {
     #[inline(always)]
     fn is_ball_collide_with_paddle(ball: &Ball, pos: &(f32, f32), paddle: &Paddle, paddle_transform: &Transform) -> bool {
         //Center position of paddle in the middle of it.
-        let paddle_pos = (paddle_transform.translation[0] - paddle.width * 0.5, paddle_transform.translation[1] - paddle.height * 0.5);
+        let paddle_pos = (paddle_transform.translation[0], paddle_transform.translation[1]);
 
         //Prepare collision area rectangle coords
         let left = paddle_pos.0 - ball.radius;

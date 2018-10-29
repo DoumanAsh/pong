@@ -26,7 +26,7 @@ impl<'s> System<'s> for PaddleSystem {
                     //Movement should be limited within our screen
                     //min should just a bit lower top of the screen
                     //max should be just a bit above of the top
-                    let mv_amount = (transform.translation[1] + mv_amount).min(ARENA_HEIGHT - PADDLE_HEIGHT * 0.5).max(PADDLE_HEIGHT * 0.5);
+                    let mv_amount = (transform.translation[1] + mv_amount).min(ARENA_HEIGHT - PADDLE_HEIGHT).max(0.0);
                     //1 is position on Y
                     transform.translation[1] = mv_amount;
                 },

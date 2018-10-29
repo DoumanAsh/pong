@@ -1,7 +1,7 @@
 use amethyst::{StateData, GameData, Application, GameDataBuilder, SimpleState};
 use amethyst::prelude::{Config};
 use amethyst::input::InputBundle;
-use amethyst::renderer::{DrawSprite, DisplayConfig, Pipeline, RenderBundle, Stage, ColorMask, ALPHA};
+use amethyst::renderer::{DisplayConfig, Pipeline, RenderBundle, Stage};
 use amethyst::core::transform::bundle::TransformBundle;
 
 const ARENA_HEIGHT: f32 = 100.0;
@@ -10,7 +10,7 @@ const ARENA_HEIGHT_MIDDLE: f32 = ARENA_HEIGHT / 2.0;
 const ARENA_WIDTH_MIDDLE: f32 = ARENA_WIDTH / 2.0;
 
 mod camera;
-mod sprites;
+mod graphics;
 mod components;
 mod systems;
 
@@ -55,9 +55,8 @@ fn get_input_config() -> InputBundle<String, String> {
 pub fn run() -> amethyst::Result<()> {
     //Clear screen with black
     //clear_target takes RGB colour
-    let draw_sprite = DrawSprite::new().with_transparency(ColorMask::all(), ALPHA, None);
     let pipe = Stage::with_backbuffer().clear_target([0.0, 0.0, 0.0, 1.0], 1.0)
-                                       .with_pass(draw_sprite)
+                                       .with_pass(amethyst::renderer::DrawFlat::<amethyst::renderer::PosTex>::new())
                                        .with_pass(amethyst::ui::DrawUi::new());
 
     let pipe = Pipeline::build().with_stage(pipe);

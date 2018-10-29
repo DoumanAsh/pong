@@ -1,6 +1,5 @@
 use amethyst::prelude::{Builder, World};
 use amethyst::ecs::prelude::{DenseVecStorage, Component};
-use amethyst::renderer::{SpriteRender, SpriteSheetHandle};
 
 use amethyst::core::cgmath::Vector3;
 use amethyst::core::transform::Transform;
@@ -11,8 +10,9 @@ const BALL_VELOCITY_Y: f32 = 25.0;
 const BALL_RADIUS: f32 = 2.0;
 
 pub const PADDLE_HEIGHT: f32 = 16.0;
-const PADDLE_WIDTH: f32 = 4.0;
+const PADDLE_WIDTH: f32 = 2.0;
 
+use game;
 use game::{ARENA_HEIGHT_MIDDLE, ARENA_WIDTH, ARENA_WIDTH_MIDDLE};
 
 pub enum Side {
@@ -82,60 +82,53 @@ impl Component for Ball {
     type Storage = DenseVecStorage<Self>;
 }
 
-pub fn init_paddles(world: &mut World, sprite: SpriteSheetHandle) {
+pub fn init_paddles(world: &mut World) {
+    const PADDLE_COLOR: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
+
     let mut left_transform = Transform::default();
     let mut right_transform = Transform::default();
 
     //Prepare transform of position.
     //Middle of the screen is our anchor
     //therefore we position paddles relative to it
-    left_transform.translation = Vector3::new(PADDLE_WIDTH * 0.5, ARENA_HEIGHT_MIDDLE, 0.0);
-    right_transform.translation = Vector3::new(ARENA_WIDTH - PADDLE_WIDTH * 0.5, ARENA_HEIGHT_MIDDLE, 0.0);
+    left_transform.translation = Vector3::new(0.0, ARENA_HEIGHT_MIDDLE, 0.0);
+    right_transform.translation = Vector3::new(ARENA_WIDTH - PADDLE_WIDTH, ARENA_HEIGHT_MIDDLE, 0.0);
 
-    let sprite_left = SpriteRender {
-        sprite_sheet: sprite.clone(),
-        sprite_number: 0, // Refer to paddle texture ron, it is first.
-        flip_horizontal: false,
-        flip_vertical: false,
-    };
+    let left_mesh = game::graphics::create_mesh(world, game::graphics::generate_rectangle_vertices(0.0, 0.0, PADDLE_WIDTH, PADDLE_HEIGHT));
+    let right_mesh = game::graphics::create_mesh(world, game::graphics::generate_rectangle_vertices(0.0, 0.0, PADDLE_WIDTH, PADDLE_HEIGHT));
 
-    let sprite_right = SpriteRender {
-        sprite_sheet: sprite,
-        sprite_number: 0,
-        flip_horizontal: true,
-        flip_vertical: false,
-    };
+    let left_material = game::graphics::create_colour_material(world, PADDLE_COLOR);
+    let right_material = game::graphics::create_colour_material(world, PADDLE_COLOR);
 
     //We create only entities with our paddles
     //and attach sprites to them
     world.create_entity_unchecked()
-         .with(sprite_left)
+         .with(left_mesh)
+         .with(left_material)
          .with(Paddle::left())
          .with(left_transform)
          .build();
 
     world.create_entity_unchecked()
-         .with(sprite_right)
+         .with(right_mesh)
+         .with(right_material)
          .with(Paddle::right())
          .with(right_transform)
          .build();
 }
 
-pub fn init_ball(world: &mut World, sprite: SpriteSheetHandle) {
+pub fn init_ball(world: &mut World) {
+    const BALL_COLOR: [f32; 4] = [0.0, 0.0, 1.0, 1.0];
     //Place ball at exact center
     let mut transform = Transform::default();
-
     transform.translation = Vector3::new(ARENA_WIDTH_MIDDLE, ARENA_HEIGHT_MIDDLE, 0.0);
 
-    let sprite = SpriteRender {
-        sprite_sheet: sprite,
-        sprite_number: 1, //Ball is the second sprite in the ron config.
-        flip_horizontal: true,
-        flip_vertical: false,
-    };
+    let mesh = game::graphics::create_mesh(world, game::graphics::generate_circle_vertices(BALL_RADIUS, 16));
+    let material = game::graphics::create_colour_material(world, BALL_COLOR);
 
     world.create_entity_unchecked()
-         .with(sprite)
+         .with(mesh)
+         .with(material)
          .with(Ball::default())
          .with(transform)
          .build();
