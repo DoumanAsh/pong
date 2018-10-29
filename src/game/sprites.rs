@@ -14,7 +14,7 @@ pub fn load_paddle(world: &mut World) -> SpriteSheetHandle {
         let loader = world.read_resource::<Loader>();
         let storage = world.read_resource::<AssetStorage<Texture>>();
 
-        loader.load(PADDLE_TEXTURE_PATH, PngFormat, TextureMetadata::srgb_scale(), (), &storage)
+        loader.load(PADDLE_TEXTURE_PATH, PngFormat, TextureMetadata::srgb(), (), &storage)
     };
 
     //Write new sprite into texture store.
