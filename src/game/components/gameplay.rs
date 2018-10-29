@@ -13,7 +13,7 @@ const BALL_RADIUS: f32 = 2.0;
 pub const PADDLE_HEIGHT: f32 = 16.0;
 const PADDLE_WIDTH: f32 = 4.0;
 
-use super::{ARENA_HEIGHT_MIDDLE, ARENA_WIDTH_MIDDLE};
+use game::{ARENA_HEIGHT_MIDDLE, ARENA_WIDTH, ARENA_WIDTH_MIDDLE};
 
 pub enum Side {
     Left,
@@ -82,7 +82,7 @@ impl Component for Ball {
     type Storage = DenseVecStorage<Self>;
 }
 
-fn init_paddles(world: &mut World, sprite: SpriteSheetHandle) {
+pub fn init_paddles(world: &mut World, sprite: SpriteSheetHandle) {
     let mut left_transform = Transform::default();
     let mut right_transform = Transform::default();
 
@@ -90,7 +90,7 @@ fn init_paddles(world: &mut World, sprite: SpriteSheetHandle) {
     //Middle of the screen is our anchor
     //therefore we position paddles relative to it
     left_transform.translation = Vector3::new(PADDLE_WIDTH * 0.5, ARENA_HEIGHT_MIDDLE, 0.0);
-    right_transform.translation = Vector3::new(super::ARENA_WIDTH - PADDLE_WIDTH * 0.5, ARENA_HEIGHT_MIDDLE, 0.0);
+    right_transform.translation = Vector3::new(ARENA_WIDTH - PADDLE_WIDTH * 0.5, ARENA_HEIGHT_MIDDLE, 0.0);
 
     let sprite_left = SpriteRender {
         sprite_sheet: sprite.clone(),
@@ -121,7 +121,7 @@ fn init_paddles(world: &mut World, sprite: SpriteSheetHandle) {
          .build();
 }
 
-fn init_ball(world: &mut World, sprite: SpriteSheetHandle) {
+pub fn init_ball(world: &mut World, sprite: SpriteSheetHandle) {
     //Place ball at exact center
     let mut transform = Transform::default();
 
@@ -139,12 +139,4 @@ fn init_ball(world: &mut World, sprite: SpriteSheetHandle) {
          .with(Ball::default())
          .with(transform)
          .build();
-}
-
-pub fn initialize(world: &mut World) {
-    //Now we load sprites for them and render them on screen
-    let sprite = super::sprites::load_paddle(world);
-
-    init_paddles(world, sprite.clone());
-    init_ball(world, sprite);
 }

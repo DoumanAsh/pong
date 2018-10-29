@@ -1,13 +1,22 @@
 use amethyst::core::Transform;
 use amethyst::core::timing::Time;
-use amethyst::ecs::{Join, Read, ReadStorage, System, WriteStorage};
+use amethyst::ecs::{Join, Read, ReadStorage, ReadExpect, System, Write, WriteStorage};
+use amethyst::ui::UiText;
 
 use utils;
-use game::components::{BALL_NUM, Paddle, Ball};
+use game::components::ui::{ScoreText};
+use game::components::gameplay::{BALL_NUM, Paddle, Ball};
 use game::{ARENA_WIDTH_MIDDLE, ARENA_HEIGHT_MIDDLE, ARENA_WIDTH, ARENA_HEIGHT};
 
 pub const MOVE: &'static str = "ball_move_system";
 pub const COLLISION: &'static str = "ball_collision_system";
+
+const SCORE_CAP: u16 = 999;
+#[derive(Default)]
+pub struct ScoreBoard {
+    p1: u16,
+    p2: u16,
+}
 
 pub struct BallMove;
 
@@ -47,11 +56,7 @@ impl BallCollision {
 
         //Are we within collision rectangle?
         if pos.0 >= left && pos.0 <= right && pos.1 >= bottom && pos.1 <= top {
-            if paddle.side.is_left() && ball.velocity[0] < 0.0 {
-                return true;
-            } else if paddle.side.is_right() && ball.velocity[0] > 0.0 {
-                return true;
-            }
+            return true;
         }
 
         false
@@ -59,9 +64,9 @@ impl BallCollision {
 }
 
 impl<'s> System<'s> for BallCollision {
-    type SystemData = (WriteStorage<'s, Ball>, ReadStorage<'s, Paddle>, WriteStorage<'s, Transform>);
+    type SystemData = (WriteStorage<'s, Ball>, ReadStorage<'s, Paddle>, WriteStorage<'s, Transform>, WriteStorage<'s, UiText>, Write<'s, ScoreBoard>, ReadExpect<'s, ScoreText>);
 
-    fn run(&mut self, (mut balls, paddles, mut transforms): Self::SystemData) {
+    fn run(&mut self, (mut balls, paddles, mut transforms, mut ui_text, mut score_board, score_text): Self::SystemData) {
         let mut balls_passed = [true; BALL_NUM];
         let mut ball_idx = 0;
 
@@ -82,8 +87,23 @@ impl<'s> System<'s> for BallCollision {
             } else {
                 for (paddle, paddle_transform) in (&paddles, &transforms).join() {
                     if Self::is_ball_collide_with_paddle(ball, &pos, paddle, paddle_transform) {
-                        ball.velocity[0] = -ball.velocity[0];
-                        continue 'ball;
+                        if paddle.side.is_left() && ball.velocity[0] < 0.0 {
+                            ball.velocity[0] = -ball.velocity[0];
+
+                            score_board.p1 = std::cmp::min(SCORE_CAP, score_board.p1 + 1);
+                            if let Some(text) = ui_text.get_mut(score_text.p1) {
+                                text.text = score_board.p1.to_string();
+                            }
+                            continue 'ball;
+                        } else if paddle.side.is_right() && ball.velocity[0] > 0.0 {
+                            ball.velocity[0] = -ball.velocity[0];
+
+                            score_board.p2 = std::cmp::min(SCORE_CAP, score_board.p2 + 1);
+                            if let Some(text) = ui_text.get_mut(score_text.p2) {
+                                text.text = score_board.p2.to_string();
+                            }
+                            continue 'ball;
+                        }
                     }
                 }
             }
@@ -102,8 +122,18 @@ impl<'s> System<'s> for BallCollision {
                 //Stop ball if we reach left or right edges
                 if pos.0 <= ball.radius && ball.velocity[0] < 0.0 {
                     Self::reset_ball(ball, transform);
+
+                    score_board.p1 = 0;
+                    if let Some(text) = ui_text.get_mut(score_text.p1) {
+                        text.text = score_board.p1.to_string();
+                    }
                 } else if pos.0 >= ARENA_WIDTH - ball.radius && ball.velocity[0] > 0.0 {
                     Self::reset_ball(ball, transform);
+
+                    score_board.p2 = 0;
+                    if let Some(text) = ui_text.get_mut(score_text.p2) {
+                        text.text = score_board.p2.to_string();
+                    }
                 }
             }
 

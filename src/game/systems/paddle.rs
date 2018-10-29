@@ -3,7 +3,7 @@ use amethyst::ecs::{Join, Read, ReadStorage, System, WriteStorage};
 use amethyst::input::InputHandler;
 use amethyst::core::timing::Time;
 
-use game::components::{Side, Paddle, PADDLE_HEIGHT};
+use game::components::gameplay::{Side, Paddle, PADDLE_HEIGHT};
 use game::ARENA_HEIGHT;
 
 pub struct PaddleSystem;
