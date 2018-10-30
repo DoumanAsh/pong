@@ -5,9 +5,12 @@ authors = []
 
 [dependencies]
 amethyst = "0.9"
-lazy-panic = "0.3"
 rand = "0.5"
 cute-log = "1"
+
+[dependencies.lazy-panic]
+version = "0.3"
+features = ["backtrace-on"]
 
 [dependencies.log]
 version = "0"
