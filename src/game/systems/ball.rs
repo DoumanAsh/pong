@@ -67,11 +67,14 @@ impl BallCollision {
 
 impl<'s> System<'s> for BallCollision {
     type SystemData = (WriteStorage<'s, Ball>, ReadStorage<'s, Paddle>,
-                       WriteStorage<'s, Transform>,
+                       WriteStorage<'s, Transform>, WriteStorage<'s, amethyst::ui::UiTransform>, WriteStorage<'s, amethyst::ui::UiImage>,
                        WriteStorage<'s, UiText>, Write<'s, ScoreBoard>, ReadExpect<'s, ScoreText>,
-                       Read<'s, AssetStorage<amethyst::audio::Source>>, ReadExpect<'s, game::audio::Sounds>, Option<Read<'s, amethyst::audio::output::Output>>);
+                       Read<'s, AssetStorage<amethyst::audio::Source>>, ReadExpect<'s, game::audio::Sounds>, Option<Read<'s, amethyst::audio::output::Output>>,
+                       ReadExpect<'s, game::components::utils::Images>,
+                       WriteStorage<'s, amethyst::utils::time_destroy::DestroyInTime>,
+                       amethyst::ecs::Entities<'s>);
 
-    fn run(&mut self, (mut balls, paddles, mut transforms, mut ui_text, mut score_board, score_text, audio_storage, sounds, audio_output): Self::SystemData) {
+    fn run(&mut self, (mut balls, paddles, mut transforms, mut ui_transform, mut ui_image, mut ui_text, mut score_board, score_text, audio_storage, sounds, audio_output, images, mut time_destroy, entities): Self::SystemData) {
         let mut balls_passed = [true; BALL_NUM];
         let mut ball_idx = 0;
 
@@ -89,30 +92,32 @@ impl<'s> System<'s> for BallCollision {
             } else if pos.1 >= ARENA_HEIGHT - ball.radius && ball.velocity[1] > 0.0 {
                 ball.velocity[1] = -ball.velocity[1];
                 continue;
-            } else {
-                for (paddle, paddle_transform) in (&paddles, &transforms).join() {
-                    if Self::is_ball_collide_with_paddle(ball, &pos, paddle, paddle_transform) {
-                        if paddle.side.is_left() && ball.velocity[0] < 0.0 {
-                            ball.velocity[0] = -ball.velocity[0];
+            }
 
-                            sounds.play_nepu(&audio_storage, audio_output.as_ref().map(std::ops::Deref::deref));
+            for (paddle, paddle_transform) in (&paddles, &transforms).join() {
+                if Self::is_ball_collide_with_paddle(ball, &pos, paddle, paddle_transform) {
+                    if paddle.side.is_left() && ball.velocity[0] < 0.0 {
+                        ball.velocity[0] = -ball.velocity[0];
 
-                            score_board.p1 = std::cmp::min(SCORE_CAP, score_board.p1 + 1);
-                            if let Some(text) = ui_text.get_mut(score_text.p1) {
-                                text.text = score_board.p1.to_string();
-                            }
-                            continue 'ball;
-                        } else if paddle.side.is_right() && ball.velocity[0] > 0.0 {
-                            ball.velocity[0] = -ball.velocity[0];
+                        images.spawn_nepu(&entities, paddle.side, &mut ui_transform, &mut ui_image, &mut time_destroy);
+                        sounds.play_nepu(&audio_storage, audio_output.as_ref().map(std::ops::Deref::deref));
 
-                            sounds.play_nepu(&audio_storage, audio_output.as_ref().map(std::ops::Deref::deref));
-
-                            score_board.p2 = std::cmp::min(SCORE_CAP, score_board.p2 + 1);
-                            if let Some(text) = ui_text.get_mut(score_text.p2) {
-                                text.text = score_board.p2.to_string();
-                            }
-                            continue 'ball;
+                        score_board.p1 = std::cmp::min(SCORE_CAP, score_board.p1 + 1);
+                        if let Some(text) = ui_text.get_mut(score_text.p1) {
+                            text.text = score_board.p1.to_string();
                         }
+                        continue 'ball;
+                    } else if paddle.side.is_right() && ball.velocity[0] > 0.0 {
+                        ball.velocity[0] = -ball.velocity[0];
+
+                        images.spawn_nepu(&entities, paddle.side, &mut ui_transform, &mut ui_image, &mut time_destroy);
+                        sounds.play_nepu(&audio_storage, audio_output.as_ref().map(std::ops::Deref::deref));
+
+                        score_board.p2 = std::cmp::min(SCORE_CAP, score_board.p2 + 1);
+                        if let Some(text) = ui_text.get_mut(score_text.p2) {
+                            text.text = score_board.p2.to_string();
+                        }
+                        continue 'ball;
                     }
                 }
             }

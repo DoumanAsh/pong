@@ -15,6 +15,7 @@ const PADDLE_WIDTH: f32 = 2.0;
 use game;
 use game::{ARENA_HEIGHT_MIDDLE, ARENA_WIDTH, ARENA_WIDTH_MIDDLE};
 
+#[derive(Clone, Copy)]
 pub enum Side {
     Left,
     Right,

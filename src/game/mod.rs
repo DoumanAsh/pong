@@ -58,6 +58,7 @@ pub fn run() -> amethyst::Result<()> {
     //clear_target takes RGB colour
     let pipe = Stage::with_backbuffer().clear_target([0.0, 0.0, 0.0, 1.0], 1.0)
                                        .with_pass(amethyst::renderer::DrawFlat::<amethyst::renderer::PosTex>::new())
+                                       .with_pass(amethyst::renderer::DrawSprite::new().with_transparency(amethyst::renderer::ColorMask::all(), amethyst::renderer::ALPHA, None))
                                        .with_pass(amethyst::ui::DrawUi::new());
 
     let pipe = Pipeline::build().with_stage(pipe);
@@ -68,6 +69,7 @@ pub fn run() -> amethyst::Result<()> {
                                               .with_bundle(get_input_config()).expect("To add bundle")
                                               .with_bundle(amethyst::audio::AudioBundle::new(|_: &mut audio::Sounds| None)).expect("To add bundle")
                                               .with_bundle(amethyst::ui::UiBundle::<String, String>::new()).expect("To add bundle")
+                                              .with(amethyst::utils::time_destroy::TimedDestroySystem, "TimedDestroySystem", &[])
                                               .with(systems::PaddleSystem, systems::paddle::NAME, &["input_system"])
                                               .with(systems::BallMove, systems::ball::MOVE, &[])
                                               .with(systems::BallCollision, systems::ball::COLLISION, &[systems::ball::MOVE, systems::paddle::NAME]);
