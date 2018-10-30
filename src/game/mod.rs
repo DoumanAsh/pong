@@ -1,5 +1,4 @@
 use amethyst::{StateData, GameData, Application, GameDataBuilder, SimpleState};
-use amethyst::prelude::{Config};
 use amethyst::input::InputBundle;
 use amethyst::renderer::{DisplayConfig, Pipeline, RenderBundle, Stage};
 use amethyst::core::transform::bundle::TransformBundle;
@@ -34,21 +33,34 @@ impl<'a, 'b> SimpleState<'a, 'b> for Game {
 fn get_resource_dir() -> std::path::PathBuf {
     let mut path = std::env::current_exe().unwrap();
     path.pop();
-    path.push("resources");
 
     path
 }
 
 fn get_display_config() -> DisplayConfig {
-    let mut path = get_resource_dir();
-    path.push("display_config.ron");
-
-    DisplayConfig::load(&path)
+    DisplayConfig {
+        title: "Nepu Pong".to_owned(),
+        dimensions: None,
+        max_dimensions: None,
+        min_dimensions: None,
+        fullscreen: false,
+        multisampling: 1,
+        visibility: true,
+        vsync: true,
+    }
 }
 
 fn get_input_config() -> InputBundle<String, String> {
+    use std::io::Write;
+
+    const DEFAULT_BINDINGS: &'static [u8] = include_bytes!("../../resources/bindings_config.ron");
     let mut path = get_resource_dir();
     path.push("bindings_config.ron");
+
+    if !path.is_file() {
+        let mut file = std::fs::File::create(&path).expect("To create default bindings file");
+        let _ = file.write_all(DEFAULT_BINDINGS);
+    }
 
     InputBundle::<String, String>::new().with_bindings_from_file(path).expect("To load input config")
 }
