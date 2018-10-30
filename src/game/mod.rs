@@ -58,11 +58,10 @@ pub fn run() -> amethyst::Result<()> {
     //clear_target takes RGB colour
     let pipe = Stage::with_backbuffer().clear_target([0.0, 0.0, 0.0, 1.0], 1.0)
                                        .with_pass(amethyst::renderer::DrawFlat::<amethyst::renderer::PosTex>::new())
-                                       .with_pass(amethyst::renderer::DrawSprite::new().with_transparency(amethyst::renderer::ColorMask::all(), amethyst::renderer::ALPHA, None))
                                        .with_pass(amethyst::ui::DrawUi::new());
 
     let pipe = Pipeline::build().with_stage(pipe);
-    let pipe = RenderBundle::new(pipe, Some(get_display_config())).with_sprite_sheet_processor();
+    let pipe = RenderBundle::new(pipe, Some(get_display_config()));
 
     let game_data = GameDataBuilder::default().with_bundle(pipe).expect("To add bundle")
                                               .with_bundle(TransformBundle::new()).expect("To add bundle")

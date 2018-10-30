@@ -99,24 +99,26 @@ impl<'s> System<'s> for BallCollision {
                     if paddle.side.is_left() && ball.velocity[0] < 0.0 {
                         ball.velocity[0] = -ball.velocity[0];
 
-                        images.spawn_nepu(&entities, paddle.side, &mut ui_transform, &mut ui_image, &mut time_destroy);
                         sounds.play_nepu(&audio_storage, audio_output.as_ref().map(std::ops::Deref::deref));
 
                         score_board.p1 = std::cmp::min(SCORE_CAP, score_board.p1 + 1);
                         if let Some(text) = ui_text.get_mut(score_text.p1) {
                             text.text = score_board.p1.to_string();
                         }
+
+                        images.spawn_nepu(&entities, paddle.side, &mut ui_transform, &mut ui_image, &mut time_destroy);
                         continue 'ball;
                     } else if paddle.side.is_right() && ball.velocity[0] > 0.0 {
                         ball.velocity[0] = -ball.velocity[0];
 
-                        images.spawn_nepu(&entities, paddle.side, &mut ui_transform, &mut ui_image, &mut time_destroy);
                         sounds.play_nepu(&audio_storage, audio_output.as_ref().map(std::ops::Deref::deref));
 
                         score_board.p2 = std::cmp::min(SCORE_CAP, score_board.p2 + 1);
                         if let Some(text) = ui_text.get_mut(score_text.p2) {
                             text.text = score_board.p2.to_string();
                         }
+
+                        images.spawn_nepu(&entities, paddle.side, &mut ui_transform, &mut ui_image, &mut time_destroy);
                         continue 'ball;
                     }
                 }
@@ -131,9 +133,8 @@ impl<'s> System<'s> for BallCollision {
             if balls_passed[ball_idx] == false {
                 let pos = (transform.translation[0], transform.translation[1]);
 
-                //TODO: Implement game over? Or restart?
-                //left edge 0, right 100
-                //Stop ball if we reach left or right edges
+                //On fail ball is being reset at random direction
+                //and player loses scores
                 if pos.0 <= ball.radius && ball.velocity[0] < 0.0 {
                     Self::reset_ball(ball, transform);
 
