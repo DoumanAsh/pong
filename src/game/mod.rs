@@ -80,7 +80,7 @@ macro_rules! init_world {
 
 #[derive(Default)]
 struct PausedGame {
-    ui: Option<amethyst::ecs::prelude::Entity>
+    ui: Option<components::ui::Paused>,
 }
 
 impl<'a, 'b> amethyst::State<GameData<'a, 'b>, amethyst::StateEvent> for PausedGame {
@@ -93,12 +93,12 @@ impl<'a, 'b> amethyst::State<GameData<'a, 'b>, amethyst::StateEvent> for PausedG
         amethyst::Trans::None
     }
 
-    fn handle_event(&mut self, data: amethyst::StateData<GameData>, event: amethyst::StateEvent) -> amethyst::Trans<GameData<'a, 'b>, amethyst::StateEvent> {
+    fn handle_event(&mut self, mut data: amethyst::StateData<GameData>, event: amethyst::StateEvent) -> amethyst::Trans<GameData<'a, 'b>, amethyst::StateEvent> {
         match event {
             amethyst::StateEvent::Window(event) => if amethyst::input::is_close_requested(&event) {
                 amethyst::Trans::Quit
             } else if amethyst::input::is_key_down(&event, amethyst::renderer::VirtualKeyCode::Escape) {
-                let _ = data.world.delete_entity(self.ui.take().unwrap());
+                self.ui.take().unwrap().destroy(&mut data.world);
                 amethyst::Trans::Pop
             } else {
                 amethyst::Trans::None
