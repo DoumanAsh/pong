@@ -81,14 +81,20 @@ impl Paused {
 pub fn create_paused_ui(world: &mut World) -> Paused {
     let texture = world.read_resource::<Images>().overlay.clone();
     let image = amethyst::ui::UiImage { texture };
+    let mut overlay_transform = amethyst::ui::UiTransform::new(
+        "Overlay".to_string(),
+        amethyst::ui::Anchor::Middle,
+        0.0, 0.0, 1.5,
+        1.0, 1.0,
+        0
+    );
+    overlay_transform.stretch = amethyst::ui::Stretch::XY {
+        x_margin: 0.0,
+        y_margin: 0.0,
+    };
+
     let overlay = world.create_entity()
-                       .with(amethyst::ui::UiTransform::new(
-                               "Overlay".to_string(),
-                               amethyst::ui::Anchor::Middle,
-                               0.0, 0.0, 1.5,
-                               1000.0, 1000.0,
-                               0
-                       ).as_percent())
+                       .with(overlay_transform)
                        .with(image)
                        .build();
 
